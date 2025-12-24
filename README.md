@@ -1,11 +1,8 @@
 # [textarea.my](https://textarea.my)
 
-## What is this madness?
+A _minimalist_ text editor that lives entirely in your browser and stores everything in the URL hash.
 
-A minimalist text editor that lives entirely in your browser and stores everything in the URL hash. Yes, you read that
-right. Your entire novel is now part of the address bar. Good luck sharing that link!
-
-## Features (aka things that make this ridiculous)
+## Features
 
 - 📝 **It's a textarea!** Actually not.
 - 🗜️ **Compression magic** - Your text gets compressed with deflate because we're fancy like that
