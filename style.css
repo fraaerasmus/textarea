@@ -1,0 +1,51 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light dark;
+  background-color: #fff;
+  color: #161616;
+
+  @media (prefers-color-scheme: dark) {
+    background-color: #000;
+    color: #fff;
+  }
+}
+
+article {
+  outline: none;
+  padding: 18px max(18px, calc(50vw - 400px));
+  width: 100%;
+  min-height: 100vh;
+  font: 18px / 1.5 ui-monospace, monospace;
+  tab-size: 4;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  white-space: pre-wrap;
+  text-wrap-style: pretty;
+  overflow-wrap: break-word;
+}
+
+/* Vim mode */
+article.normal-mode,
+article.visual-mode,
+article.visual-line-mode {
+  caret-color: transparent;
+}
+
+article.normal-mode::selection,
+article.normal-mode *::selection {
+  background-color: #161616;
+  color: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  article.normal-mode::selection,
+  article.normal-mode *::selection {
+    background-color: #fff;
+    color: #000;
+  }
+}
