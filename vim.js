@@ -9,11 +9,17 @@ article.addEventListener("keydown", (e) => {
     return;
   }
 
+  if (e.ctrlKey && e.key === "r" && vim.mode === "normal") {
+    e.preventDefault();
+    redo();
+    return;
+  }
+
   if (e.metaKey || e.ctrlKey) return;
 
   const handlers = {
     normal: {
-      i: enterInsert,
+      i: insertAtCursor,
       a: append,
       A: appendEOL,
       v: visual,
@@ -26,6 +32,9 @@ article.addEventListener("keydown", (e) => {
       l: moveRight,
       o: openBelow,
       O: openAbove,
+      u: undo,
+      p: pasteAfter,
+      P: pasteBefore,
     },
     visual: {
       Escape: enterNormal,
@@ -65,7 +74,12 @@ function enterNormal() {
 function enterInsert() {
   vim.mode = "insert";
   article.className = "";
-  collapseCursor();
+}
+
+function insertAtCursor() {
+  const sel = getSelection();
+  if (sel.rangeCount) sel.collapseToStart();
+  enterInsert();
 }
 
 function append() {
@@ -119,12 +133,32 @@ function yankLine() {
   selectCharAtCursor();
 }
 
-function del() {
+function undo() {
+  document.execCommand("undo");
+}
+
+function redo() {
+  document.execCommand("redo");
+}
+
+function pasteAfter() {
+  if (!vim.register) return;
   const sel = getSelection();
-  if (sel.rangeCount) {
-    sel.getRangeAt(0).deleteContents();
-    article.dispatchEvent(new Event("input", { bubbles: true }));
-  }
+  if (sel.rangeCount) sel.collapseToEnd();
+  document.execCommand("insertText", false, vim.register);
+  enterNormal();
+}
+
+function pasteBefore() {
+  if (!vim.register) return;
+  const sel = getSelection();
+  if (sel.rangeCount) sel.collapseToStart();
+  document.execCommand("insertText", false, vim.register);
+  enterNormal();
+}
+
+function del() {
+  document.execCommand("delete");
   enterNormal();
 }
 
@@ -133,8 +167,7 @@ function deleteToEOL() {
   const { end } = getLineRange();
   if (pos < end) {
     selectRange(pos, end);
-    getSelection().getRangeAt(0).deleteContents();
-    article.dispatchEvent(new Event("input", { bubbles: true }));
+    document.execCommand("delete");
   }
   selectCharAtCursor();
 }
@@ -215,14 +248,14 @@ function moveTo(newPos) {
 function openBelow() {
   const { end } = getLineRange();
   setCursor(end);
-  document.execCommand("insertText", false, "\n");
+  document.execCommand("insertLineBreak");
   enterInsert();
 }
 
 function openAbove() {
   const { start } = getLineRange();
   setCursor(start);
-  document.execCommand("insertText", false, "\n");
+  document.execCommand("insertLineBreak");
   setCursor(start);
   enterInsert();
 }
@@ -272,11 +305,6 @@ function selectCharAtCursor() {
   if (text.length === 0) return;
   const end = Math.min(pos + 1, text.length);
   selectRange(Math.min(pos, text.length - 1), end);
-}
-
-function collapseCursor() {
-  const sel = getSelection();
-  if (sel.rangeCount) sel.collapseToEnd();
 }
 
 function findNodeAtOffset(targetOffset) {
