@@ -1,4 +1,4 @@
-const vim = { mode: "insert", register: "", anchor: 0, cursor: 0 };
+const vim = { mode: "insert", register: "", anchor: 0, cursor: 0, pending: "" };
 
 article.addEventListener("keydown", (e) => {
   if (vim.mode === "insert") {
@@ -16,6 +16,21 @@ article.addEventListener("keydown", (e) => {
   }
 
   if (e.metaKey || e.ctrlKey) return;
+
+  if (vim.mode === "normal" && vim.pending === "d") {
+    vim.pending = "";
+    if (e.key === "d") {
+      e.preventDefault();
+      deleteLine();
+      return;
+    }
+  }
+
+  if (vim.mode === "normal" && e.key === "d") {
+    e.preventDefault();
+    vim.pending = "d";
+    return;
+  }
 
   const handlers = {
     normal: {
@@ -169,6 +184,16 @@ function deleteToEOL() {
     selectRange(pos, end);
     document.execCommand("delete");
   }
+  selectCharAtCursor();
+}
+
+function deleteLine() {
+  const { start, end } = getLineRange();
+  const text = article.textContent;
+  const deleteEnd = end < text.length ? end + 1 : end;
+  const deleteStart = start > 0 && end >= text.length ? start - 1 : start;
+  selectRange(deleteStart, deleteEnd);
+  document.execCommand("delete");
   selectCharAtCursor();
 }
 
